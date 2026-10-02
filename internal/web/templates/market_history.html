@@ -1,0 +1,110 @@
+{{define "market_history"}}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="refresh" content="120">
+  <title>{{.Config.HistoryTitle}} · FomoRadar</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body class="market-body market-history-page">
+  <header class="topbar market-topbar">
+    <a class="brand" href="/"><span class="brand-dot"></span>FomoRadar</a>
+    <nav aria-label="主导航"><a href="/">新币雷达</a><a href="/market">主流币雷达</a><a href="/stocks">美股雷达</a><a href="/market/history" aria-current="page">历史榜单</a></nav>
+    <span class="read-only">OKX PUBLIC · AUTO SCAN</span>
+  </header>
+  <main class="market-history-main">
+    <header class="market-history-head">
+      <div>
+        <h1>{{.Config.HistoryTitle}}</h1>
+        {{if eq .EffectiveScans 0}}
+          <p>暂无完整扫描记录</p>
+        {{else}}
+          <p>{{if eq .Filter.Window "7d"}}7 天{{else}}24 小时{{end}} · {{.EffectiveScans}} 次有效扫描 · 更新于 {{time .GeneratedAt}}</p>
+        {{end}}
+      </div>
+      <div class="market-history-controls" aria-label="榜单筛选">
+        <div class="market-history-filter" aria-label="榜单类别">
+          <a href="{{historyURL "/market/history" .Filter.Window .Filter.Status .Filter.Sort .Filter.Direction}}" {{if eq .Config.AssetClass "crypto"}}aria-current="page"{{end}}>主流币</a>
+          <a href="{{historyURL "/stocks/history" .Filter.Window .Filter.Status .Filter.Sort .Filter.Direction}}" {{if eq .Config.AssetClass "stock"}}aria-current="page"{{end}}>美股</a>
+        </div>
+        <div class="market-history-filter" aria-label="统计窗口">
+          <a href="{{historyURL .Config.HistoryPath "24h" .Filter.Status .Filter.Sort .Filter.Direction}}" {{if eq .Filter.Window "24h"}}aria-current="page"{{end}}>24 小时</a>
+          <a href="{{historyURL .Config.HistoryPath "7d" .Filter.Status .Filter.Sort .Filter.Direction}}" {{if eq .Filter.Window "7d"}}aria-current="page"{{end}}>7 天</a>
+        </div>
+        <div class="market-history-filter" aria-label="机会状态">
+          <a href="{{historyURL .Config.HistoryPath .Filter.Window "all" .Filter.Sort .Filter.Direction}}" {{if eq .Filter.Status "all"}}aria-current="page"{{end}}>全部</a>
+          <a href="{{historyURL .Config.HistoryPath .Filter.Window "active" .Filter.Sort .Filter.Direction}}" {{if eq .Filter.Status "active"}}aria-current="page"{{end}}>当前活跃</a>
+          <a href="{{historyURL .Config.HistoryPath .Filter.Window "ended" .Filter.Sort .Filter.Direction}}" {{if eq .Filter.Status "ended"}}aria-current="page"{{end}}>已结束</a>
+        </div>
+      </div>
+    </header>
+
+    <section class="market-history-table-wrap" aria-label="{{.Config.Title}}历史排名">
+      {{if .Rows}}
+      <table class="market-history-table">
+        <thead>
+          <tr>
+            <th scope="col">排名</th>
+            <th scope="col">{{.Config.AssetLabel}}</th>
+            <th scope="col">状态</th>
+            <th scope="col"><a href="{{historyURL .Config.HistoryPath .Filter.Window .Filter.Status "rate" (historyNextDir .Filter.Sort .Filter.Direction "rate")}}">上榜率 <span>{{historySortArrow .Filter.Sort .Filter.Direction "rate"}}</span></a></th>
+            <th scope="col"><a href="{{historyURL .Config.HistoryPath .Filter.Window .Filter.Status "count" (historyNextDir .Filter.Sort .Filter.Direction "count")}}">上榜次数 <span>{{historySortArrow .Filter.Sort .Filter.Direction "count"}}</span></a></th>
+            <th scope="col">首榜价 → 当前/结束价</th>
+            <th scope="col"><a href="{{historyURL .Config.HistoryPath .Filter.Window .Filter.Status "return" (historyNextDir .Filter.Sort .Filter.Direction "return")}}">收益 <span>{{historySortArrow .Filter.Sort .Filter.Direction "return"}}</span></a></th>
+            <th scope="col">最近上榜</th>
+            <th scope="col"><span class="sr-only">展开历史</span></th>
+          </tr>
+        </thead>
+        <tbody>
+        {{range .Rows}}
+          <tr class="market-history-row">
+            <td class="market-history-rank">{{printf "%02d" .Rank}}</td>
+            <td><strong class="market-history-symbol">{{.Symbol}}</strong><small>{{.InstrumentID}}</small></td>
+            <td><span class="market-history-status {{.Status}}">{{if eq .Status "active"}}当前活跃{{else}}已结束{{end}}</span></td>
+            <td><strong>{{printf "%.1f%%" .ListingRate}}</strong></td>
+            <td>{{.Appearances}} / {{.ExperiencedScans}}</td>
+            <td class="market-history-price">{{marketPrice .FirstPrice}} <span>→</span> {{historyPrice .EvaluationPrice}}</td>
+            <td class="{{historyReturnClass .ReturnPct}}"><strong>{{historyReturn .ReturnPct}}</strong></td>
+            <td><time datetime="{{.LastListedAt.Format "2006-01-02T15:04:05Z07:00"}}">{{time .LastListedAt}}</time></td>
+            <td><button class="market-history-toggle" type="button" data-history-toggle aria-expanded="false" aria-controls="history-detail-{{.Rank}}"><span aria-hidden="true">⌄</span><span class="sr-only">展开 {{.Symbol}} 历史轮次</span></button></td>
+          </tr>
+          <tr id="history-detail-{{.Rank}}" class="market-history-detail" hidden>
+            <td colspan="9">
+              <div class="market-history-episodes">
+                <div class="market-history-episode market-history-episode-head"><span>轮次开始</span><span>状态</span><span>上榜次数</span><span>首榜价 → 当前/结束价</span><span>收益</span></div>
+                {{range .Episodes}}
+                <div class="market-history-episode">
+                  <span>{{time .StartedAt}}</span>
+                  <span><b class="market-history-status {{.Status}}">{{if eq .Status "active"}}当前活跃{{else}}已结束{{end}}</b>{{if .EndedAt}}<small>确认于 {{time .EndedAt}}</small>{{end}}</span>
+                  <span>{{.Appearances}} / {{.ExperiencedScans}} <small>{{printf "%.1f%%" .ListingRate}}</small></span>
+                  <span>{{marketPrice .FirstPrice}} → {{historyPrice .EvaluationPrice}}</span>
+                  <span class="{{historyReturnClass .ReturnPct}}">{{historyReturn .ReturnPct}}</span>
+                </div>
+                {{end}}
+              </div>
+            </td>
+          </tr>
+        {{end}}
+        </tbody>
+      </table>
+      {{else}}
+      <div class="market-history-empty">{{if eq .EffectiveScans 0}}暂无完整扫描记录{{else}}当前窗口暂无上榜机会{{end}}</div>
+      {{end}}
+    </section>
+    <footer class="market-disclaimer">研究与演示用途，不构成投资建议。</footer>
+  </main>
+  <script>
+    document.querySelectorAll('[data-history-toggle]').forEach((button) => {
+      button.addEventListener('click', () => {
+        const row = document.getElementById(button.getAttribute('aria-controls'));
+        const expanded = button.getAttribute('aria-expanded') === 'true';
+        button.setAttribute('aria-expanded', String(!expanded));
+        row.hidden = expanded;
+      });
+    });
+  </script>
+</body>
+</html>
+{{end}}

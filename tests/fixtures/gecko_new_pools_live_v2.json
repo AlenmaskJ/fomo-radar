@@ -1,0 +1,52 @@
+{
+  "data": [
+    {
+      "id": "bsc_0xdff399c5d0ffa1ef244e1a94f46f9f06e736ffff",
+      "type": "pool",
+      "attributes": {
+        "base_token_price_usd": "0.00000355678261840511",
+        "address": "0xdff399c5d0ffa1ef244e1a94f46f9f06e736ffff",
+        "name": "巨兽BEHEMOTH / BNB",
+        "pool_created_at": "2026-08-16T09:01:16Z",
+        "fdv_usd": "3556.782618",
+        "market_cap_usd": null,
+        "price_change_percentage": {
+          "m5": "0"
+        },
+        "transactions": {
+          "m5": {
+            "buys": 1,
+            "sells": 0,
+            "buyers": 1,
+            "sellers": 0
+          }
+        },
+        "volume_usd": {
+          "m5": "42.0581823529",
+          "h1": "42.0581823529",
+          "h24": "42.0581823529"
+        },
+        "reserve_in_usd": "2845.009677077"
+      },
+      "relationships": {
+        "base_token": {
+          "data": {
+            "id": "bsc_0xdff399c5d0ffa1ef244e1a94f46f9f06e736ffff",
+            "type": "token"
+          }
+        }
+      }
+    }
+  ],
+  "included": [
+    {
+      "id": "bsc_0xdff399c5d0ffa1ef244e1a94f46f9f06e736ffff",
+      "type": "token",
+      "attributes": {
+        "address": "0xdff399c5d0ffa1ef244e1a94f46f9f06e736ffff",
+        "name": "直接进作者钱包",
+        "symbol": "巨兽BEHEMOTH"
+      }
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "data": [
+    {"id": "trade-1", "type": "trade", "attributes": {"tx_from_address": "addr-a", "kind": "buy", "volume_in_usd": "100", "block_timestamp": "2026-08-16T11:59:00Z"}},
+    {"id": "trade-2", "type": "trade", "attributes": {"tx_from_address": "addr-a", "kind": "buy", "volume_in_usd": "50", "block_timestamp": "2026-08-16T11:58:00Z"}},
+    {"id": "trade-3", "type": "trade", "attributes": {"tx_from_address": "addr-b", "kind": "sell", "volume_in_usd": "25", "block_timestamp": "2026-08-16T11:57:00Z"}},
+    {"id": "trade-4", "type": "trade", "attributes": {"tx_from_address": "addr-c", "kind": "buy", "volume_in_usd": "40", "block_timestamp": "2026-08-16T11:54:00Z"}},
+    {"id": "trade-5", "type": "trade", "attributes": {"tx_from_address": "addr-d", "kind": "sell", "volume_in_usd": "60", "block_timestamp": "2026-08-16T11:52:00Z"}},
+    {"id": "trade-old", "type": "trade", "attributes": {"tx_from_address": "addr-e", "kind": "buy", "volume_in_usd": "999", "block_timestamp": "2026-08-16T11:40:00Z"}}
+  ]
+}

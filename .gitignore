@@ -1,0 +1,23 @@
+.worktrees/
+.superpowers/
+
+# 本地构建与运行产物
+*.exe*
+*.db
+*.db-*
+*.log
+*.out
+coverage.out
+lab-report.txt
+score-compare.txt
+
+# 本地配置与编辑器文件
+.env
+.env.*
+.DS_Store
+Thumbs.db
+
+# 协作和面试资料不属于公开项目
+AGENTS.md
+docs/superpowers/
+docs/面试准备.md

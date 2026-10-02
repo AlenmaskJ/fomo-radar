@@ -1,0 +1,41 @@
+{{define "token"}}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Token.Symbol}} · FomoRadar</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="topbar"><a class="brand" href="/"><span class="brand-dot"></span>FomoRadar</a><nav aria-label="主导航"><a href="/">新币雷达</a><a href="/market">主流币雷达</a><a href="/stocks">美股雷达</a><a href="/market/history">历史榜单</a></nav><span class="read-only">SQLite · 只读</span></header>
+  <main class="shell detail-shell">
+    <a class="back" href="/">← 返回雷达</a>
+    <section class="token-hero panel">
+      <div><p class="eyebrow">{{chainLabel .Token.Chain}} · {{launchLabel .Token.LaunchType}}</p><h1>{{.Token.Symbol}}</h1><p class="token-name">{{.Token.Name}}</p><div class="address-row"><code class="address" id="token-ca">{{.Token.Address}}</code><button class="copy-button" type="button" data-copy="{{.Token.Address}}" onclick="navigator.clipboard.writeText(this.dataset.copy);this.textContent='已复制'">复制 CA</button></div></div>
+      <div class="hero-score"><span>原始分</span><strong>{{score .Token.RawScore}}</strong><span>有效状态</span><span class="tier {{.Token.EffectiveTier}}">{{tierLabel .Token.EffectiveTier}} <small>{{.Token.EffectiveTier}}</small></span><small>证据 {{confidenceLabel .Token.EvidenceConfidence}} · {{.Token.EvidenceAvailable}} / {{.Token.EvidenceTotal}}</small></div>
+    </section>
+
+    <section class="detail-grid detail-grid-four">
+      <article class="panel"><div class="panel-head"><div>基本信息</div></div><dl class="facts"><div><dt>名称</dt><dd>{{.Token.Name}}</dd></div><div><dt>Symbol</dt><dd>{{.Token.Symbol}}</dd></div><div><dt>链</dt><dd>{{chainLabel .Token.Chain}}</dd></div><div><dt>CA</dt><dd><code>{{.Token.Address}}</code></dd></div><div><dt>Pair</dt><dd><code>{{.Token.PairAddress}}</code></dd></div></dl></article>
+      <article class="panel"><div class="panel-head"><div>市场</div></div><dl class="facts"><div><dt>MC</dt><dd>{{money .Token.MarketCapUSD}}</dd></div><div><dt>Liquidity</dt><dd>{{money .Token.LiquidityUSD}}</dd></div><div><dt>FDV</dt><dd>{{money .Token.FDVUSD}}</dd></div><div><dt>Age</dt><dd>{{age .Token.AgeSeconds}}</dd></div><div><dt>5分钟成交量</dt><dd>{{money .Token.VolumeM5USD}}</dd></div></dl></article>
+      <article class="panel"><div class="panel-head"><div>FOMO</div><span>{{.Token.ScoreVersion}}</span></div><dl class="facts"><div><dt>原始分</dt><dd>{{score .Token.RawScore}}</dd></div><div><dt>Raw Tier</dt><dd>{{tierLabel .Token.RawTier}} <small>{{.Token.RawTier}}</small></dd></div><div><dt>有效状态</dt><dd>{{tierLabel .Token.EffectiveTier}} <small>{{.Token.EffectiveTier}}</small></dd></div><div><dt>证据</dt><dd>{{confidenceLabel .Token.EvidenceConfidence}} <small>{{.Token.EvidenceConfidence}}</small></dd></div><div><dt>核心证据</dt><dd>{{.Token.EvidenceAvailable}} / {{.Token.EvidenceTotal}}</dd></div></dl></article>
+      <article class="panel"><div class="panel-head"><div>Deep Evidence</div></div><dl class="facts"><div><dt>Unique Buyers</dt><dd>{{intValue .Token.UniqueBuyersM5}}</dd></div><div><dt>Unique Sellers</dt><dd>{{intValue .Token.UniqueSellersM5}}</dd></div><div><dt>Trades</dt><dd>{{intValue .Token.TotalTradesM5}}</dd></div><div><dt>是否 truncated</dt><dd>{{boolValue .Token.DeepTruncated}}</dd></div><div><dt>状态</dt><dd>{{deepLabel .Token.DeepStatus}} · {{stageLabel .Token.Stage}} <small>{{.Token.Stage}}</small></dd></div></dl></article>
+    </section>
+
+    <section class="detail-grid">
+      <article class="panel"><div class="panel-head"><div>Factor Breakdown</div><span>只读持久化证据</span></div><dl class="factors"><div><dt>Buyer Velocity</dt><dd>{{factorScore .Token.Factors "buyer_velocity"}}</dd></div><div><dt>Volume Velocity</dt><dd>{{factorScore .Token.Factors "volume_velocity"}}</dd></div><div><dt>Buy Pressure</dt><dd>{{factorScore .Token.Factors "buy_pressure"}}</dd></div><div><dt>Participant Growth</dt><dd>{{factorScore .Token.Factors "participant_growth"}}</dd></div><div><dt>Liquidity Quality</dt><dd>{{factorScore .Token.Factors "liquidity_quality"}}</dd></div><div><dt>Social Momentum</dt><dd>{{factorScore .Token.Factors "social_momentum"}}</dd></div><div><dt>Early Bonus</dt><dd>{{printf "%.2f" .Token.AgeBonus}}</dd></div><div><dt>Risk Penalty</dt><dd>-{{printf "%.2f" .Token.RiskPenalty}}</dd></div></dl></article>
+      <article class="panel"><div class="panel-head"><div>Launch / 数据</div></div><dl class="facts"><div><dt>Launch Type</dt><dd>{{launchLabel .Token.LaunchType}} <small>{{.Token.LaunchType}}</small></dd></div><div><dt>Discovery Pool Age</dt><dd>{{age .Token.DiscoveryPoolAge}}</dd></div><div><dt>Selected Dex Pair Age</dt><dd>{{age .Token.SelectedPairAge}}</dd></div><div><dt>Source</dt><dd>{{sourceLabel .Token.MarketDataSource}}</dd></div><div><dt>Data Quality</dt><dd>{{dataLabel .Token.DataQuality}}</dd></div></dl></article>
+      <article class="panel"><div class="panel-head"><div>风险</div></div><div class="risk-list detail-risks">{{if .Token.RiskFlags}}{{range .Token.RiskFlags}}<span>{{riskLabel .}} <small>{{.}}</small></span>{{end}}{{else}}<span class="muted">没有持久化风险标签</span>{{end}}</div></article>
+    </section>
+
+    <section class="panel score-stability">
+      <div><span>Score变化</span><strong>{{delta .ScoreChange}}</strong><small>/ {{duration .ScoreChangeDuration}}</small></div>
+      {{if .ScoreFallingFast}}<p class="falling-warning">评分快速回落</p>{{else}}<p>基于下方已存储 snapshot，仅展示，不重新计算。</p>{{end}}
+    </section>
+
+    <section class="panel timeline-panel"><div class="panel-head"><div>Score Timeline</div><span>{{len .Timeline}} 条已存 snapshot · 不重新计算</span></div>{{if .Timeline}}<div class="score-line" aria-label="Score 时间线">{{range .Timeline}}<span><small>{{time .CollectedAt}}</small><strong>{{score .RawScore}}</strong></span>{{end}}</div><div class="table-wrap"><table class="timeline"><thead><tr><th>时间</th><th>阶段</th><th>Score</th><th>有效状态</th><th>MC</th><th>Liquidity</th><th>Buyers</th><th>5分钟成交量</th><th>Deep</th></tr></thead><tbody>{{range .Timeline}}<tr><td data-label="时间">{{time .CollectedAt}}</td><td data-label="阶段">{{stageLabel .Stage}} <small>{{.Stage}}</small></td><td data-label="Score">{{score .RawScore}}</td><td data-label="有效状态"><span class="tier {{.EffectiveTier}}">{{tierLabel .EffectiveTier}}</span></td><td data-label="MC">{{money .MarketCapUSD}}</td><td data-label="Liquidity">{{money .LiquidityUSD}}</td><td data-label="Buyers">{{intValue .BuyersM5}}</td><td data-label="5分钟成交量">{{money .VolumeM5USD}}</td><td data-label="Deep">{{deepLabel .DeepStatus}}</td></tr>{{end}}</tbody></table></div>{{else}}<div class="empty"><span>没有已存 snapshot。</span></div>{{end}}</section>
+  </main>
+</body>
+</html>
+{{end}}

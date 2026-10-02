@@ -1,0 +1,54 @@
+{
+  "version": "FOMO_SCORE_V1.1",
+  "factors": {
+    "buyer_velocity": {
+      "maximum": 24,
+      "velocity_thresholds": {"full": 4, "high": 3, "medium": 2, "low": 1.5, "minimum": 1.1},
+      "point_multipliers": {"full": 1, "high": 0.85, "medium": 0.65, "low": 0.45, "minimum": 0.25}
+    },
+    "volume_velocity": {
+      "maximum": 20,
+      "velocity_thresholds": {"full": 4, "high": 3, "medium": 2, "low": 1.5, "minimum": 1.1},
+      "point_multipliers": {"full": 1, "high": 0.85, "medium": 0.65, "low": 0.45, "minimum": 0.25}
+    },
+    "buy_pressure": {
+      "maximum": 15,
+      "velocity_thresholds": {"full": 4, "high": 3, "medium": 2, "low": 1.5, "minimum": 1.1},
+      "point_multipliers": {"full": 1, "high": 0.85, "medium": 0.65, "low": 0.45, "minimum": 0.25}
+    },
+    "participant_growth": {
+      "maximum": 15,
+      "velocity_thresholds": {"full": 4, "high": 3, "medium": 2, "low": 1.5, "minimum": 1.1},
+      "point_multipliers": {"full": 1, "high": 0.85, "medium": 0.65, "low": 0.45, "minimum": 0.25}
+    },
+    "social_momentum": {
+      "maximum": 15,
+      "velocity_thresholds": {"full": 4, "high": 3, "medium": 2, "low": 1.5, "minimum": 1.1},
+      "point_multipliers": {"full": 1, "high": 0.85, "medium": 0.65, "low": 0.45, "minimum": 0.25}
+    },
+    "liquidity_quality": {
+      "maximum": 10,
+      "ratio_thresholds": {"full": 0.2, "high": 0.1, "medium": 0.05, "low": 0.02, "minimum": 0.01},
+      "point_multipliers": {"full": 1, "high": 0.85, "medium": 0.65, "low": 0.45, "minimum": 0.25}
+    }
+  },
+  "age_bonus": {"under_30m": 10, "under_60m": 6, "under_120m": 2, "later": 0},
+  "age_cutoffs_minutes": {"minutes_30": 30, "minutes_60": 60, "minutes_120": 120},
+  "risk_penalties": {
+    "top10_over_80": 30,
+    "top10_over_60": 15,
+    "liquidity_below_2000": 20,
+    "liquidity_2000_to_5000": 10,
+    "concentrated_activity": 15,
+    "suspected_bot_activity": 15,
+    "strong_dev_selling": 20
+  },
+  "risk_thresholds": {
+    "top10_high_percent": 80,
+    "top10_medium_percent": 60,
+    "liquidity_very_low_usd": 2000,
+    "liquidity_low_usd": 5000
+  },
+  "tiers": {"breakout": 85, "fast_rising": 70, "watch": 55},
+  "clamp": {"minimum": 0, "maximum": 100}
+}

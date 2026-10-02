@@ -1,0 +1,106 @@
+{{define "market"}}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta http-equiv="refresh" content="120">
+  <title>{{.Config.Title}} · FomoRadar</title>
+  <link rel="stylesheet" href="/assets/style.css">
+  <script defer src="/assets/market.js"></script>
+</head>
+<body class="market-body">
+  <header class="topbar market-topbar">
+    <a class="brand" href="/"><span class="brand-dot"></span>FomoRadar</a>
+    <nav aria-label="主导航"><a href="/">新币雷达</a><a href="/market" {{if eq .Config.AssetClass "crypto"}}aria-current="page"{{end}}>主流币雷达</a><a href="/stocks" {{if eq .Config.AssetClass "stock"}}aria-current="page"{{end}}>美股雷达</a><a href="/market/history">历史榜单</a></nav>
+    <span class="read-only">OKX PUBLIC · AUTO SCAN</span>
+  </header>
+  <main class="market-app">
+    <section class="market-command">
+      <div><p class="market-kicker">{{.Config.Kicker}}</p><h1>{{.Config.Title}}</h1><p>{{.Config.Subtitle}}</p></div>
+      <div class="scan-console" data-scan-state="{{.Status.State}}" data-page-url="{{.Config.PagePath}}" data-status-url="{{.Config.StatusPath}}" data-scan-url="{{.Config.ScanPath}}">
+        <div><span>扫描状态</span><strong id="scan-status">{{if .Status.State}}{{scanState .Status.State}}{{else}}{{scanState (printf "%s" .Report.Run.Status)}}{{end}}</strong></div>
+        <div><span>上次完成</span><strong>{{if .Report.Run.FinishedAt.IsZero}}--{{else}}{{time .Report.Run.FinishedAt}}{{end}}</strong></div>
+        <div><span>动态池</span><strong>{{.Report.Run.PoolSize}} 个</strong></div>
+        <div><span>下次雷达</span><strong>{{if .Status.NextScanAt.IsZero}}--{{else}}{{time .Status.NextScanAt}}{{end}}</strong></div>
+        <button id="scan-now" type="button">立即扫描</button>
+        <p id="scan-feedback" role="status" aria-live="polite">{{if .Stale}}扫描结果已过期，请立即扫描{{else if and .Waiting (gt .Status.ProgressTotal 0)}}{{scanTrigger .Status.Trigger}} · {{scanState .Status.State}} · {{.Status.ProgressCurrent}}/{{.Status.ProgressTotal}}{{else}}每 2 分钟更新衍生品，按周期刷新 K 线{{end}}</p>
+      </div>
+    </section>
+    {{if .Config.Notice}}<div class="market-banner warning">{{.Config.Notice}}</div>{{end}}
+    {{if eq .Report.Run.Status "degraded"}}<div class="market-banner warning">部分数据源降级：{{.Report.Run.ErrorSummary}}</div>{{end}}
+    {{if .Stale}}<div class="market-banner danger">扫描结果已过期，页面只保留上一份完整报告。</div>{{end}}
+
+    {{if .Waiting}}
+      <section class="market-empty"><span>RADAR STARTING</span><strong>正在建立首份{{.Config.Title}}报告</strong><p>首次扫描完成后，候选机会会自动显示在这里。</p></section>
+    {{else if .Report.Opportunities}}
+    <section class="radar-workspace">
+      <aside class="candidate-rail" aria-label="机会候选">
+        <div class="rail-head"><span>当前机会</span><strong>{{len .Report.Opportunities}}</strong></div>
+        <div class="candidate-list">
+        {{range $index, $op := .Report.Opportunities}}
+          <button class="radar-candidate {{if eq $index 0}}is-active{{end}}" type="button" data-opportunity="op-{{$index}}" aria-pressed="{{if eq $index 0}}true{{else}}false{{end}}">
+            <span class="candidate-rank">{{printf "%02d" (addOne $index)}}</span>
+            <span class="candidate-symbol"><strong>{{$op.Instrument.Symbol}}</strong><small>{{opportunityStage $op.Stage}}</small></span>
+            <span class="candidate-score"><strong>{{$op.OpportunityScore}}</strong><small>质量</small></span>
+            <span class="stage-chip {{opportunityClass $op.Stage}}">FOMO {{$op.FOMOScore}}</span>
+          </button>
+        {{end}}
+        </div>
+      </aside>
+
+      <div class="opportunity-deck">
+      {{range $index, $op := .Report.Opportunities}}
+        <article id="op-{{$index}}" class="opportunity-detail {{if eq $index 0}}is-active{{end}}" {{if ne $index 0}}hidden{{end}}>
+          <header class="opportunity-hero">
+            <div><span class="stage-chip {{opportunityClass $op.Stage}}">{{opportunityStage $op.Stage}}</span><h2>{{$op.Instrument.Symbol}} <small>{{$op.Instrument.InstrumentID}}</small></h2><p>{{$op.Action}}</p></div>
+            <div class="hero-price"><span>当前价格</span><strong>{{marketTickPrice $op.CurrentPrice $op.Instrument.TickSize}}</strong><small>{{time $op.GeneratedAt}}</small></div>
+          </header>
+          <section class="score-pair" aria-label="雷达评分">
+            <div><span>FOMO 启动度</span><strong>{{$op.FOMOScore}}</strong><meter min="0" max="100" value="{{$op.FOMOScore}}"></meter></div>
+            <div><span>机会质量</span><strong>{{$op.OpportunityScore}}</strong><meter min="0" max="100" value="{{$op.OpportunityScore}}"></meter></div>
+          </section>
+
+          <section class="evidence-chain">
+            <div class="section-title"><span>多周期证据链</span><small>1D → 4H → 1H → 15m</small></div>
+            <div class="evidence-grid">
+            {{range $op.Evidence}}
+              <article class="evidence-card {{if .Confirmed}}confirmed{{end}}">
+                <header><strong>{{.Timeframe}}</strong><span>{{.Score}} 分</span></header>
+                <dl><div><dt>RSI(14)</dt><dd>{{printf "%.1f" .RSI}}</dd></div><div><dt>MACD 柱</dt><dd>{{printf "%.4f" .MACDHistogram}}</dd></div></dl>
+                {{range .Reasons}}<p>{{.}}</p>{{end}}
+              </article>
+            {{end}}
+            </div>
+          </section>
+
+          {{if $op.TradePlan}}
+          <section class="trade-plan">
+            <div class="section-title"><span>分批建仓</span><small>计划，不是自动下单</small></div>
+            <div class="entry-grid">
+              {{range $op.TradePlan.Entries}}<article><span>{{weightPercent .Weight}} 左侧仓</span><strong>{{marketTickPrice .Price $op.Instrument.TickSize}}</strong><p>{{.Condition}}</p></article>{{end}}
+              <article class="confirmation"><span>{{weightPercent $op.TradePlan.ConfirmationEntry.Weight}} 确认仓</span><strong>{{marketTickPrice $op.TradePlan.ConfirmationEntry.Price $op.Instrument.TickSize}}</strong><p>{{$op.TradePlan.ConfirmationEntry.Condition}}</p></article>
+            </div>
+            <div class="risk-target-grid">
+              <article><span>计划平均成本</span><strong>{{marketTickPrice $op.TradePlan.FullAverageCost $op.Instrument.TickSize}}</strong><small>左侧成本 {{marketTickPrice $op.TradePlan.LeftAverageCost $op.Instrument.TickSize}}</small></article>
+              <article class="risk-box"><span>结构止损</span><strong>{{marketTickPrice $op.TradePlan.StopPrice $op.Instrument.TickSize}}</strong><small>风险 {{printf "%.2f%%" $op.TradePlan.RiskPct}}</small></article>
+              {{range $targetIndex, $target := $op.TradePlan.Targets}}<article class="target-box"><span>目标{{if eq $targetIndex 0}}一{{else}}二{{end}}</span><strong>{{marketTickPrice $target.Price $op.Instrument.TickSize}}</strong><small>收益 {{marketPercent $target.ReturnPct}} · {{printf "%.2f" $target.RewardRisk}}R</small></article>{{end}}
+            </div>
+            <p class="trailing-rule">跟踪退出：{{$op.TradePlan.TrailingRule}}</p>
+          </section>
+          {{else}}
+          <section class="waiting-plan"><strong>暂不生成买入计划</strong><p>当前只达到观察门槛，等待周期确认、合理止损和至少 1.3R 的目标空间。</p></section>
+          {{end}}
+          <section class="risk-flags"><strong>风险提示</strong>{{if $op.RiskFlags}}{{range $op.RiskFlags}}<span>{{.}}</span>{{end}}{{else}}<span class="quiet">暂无额外拥挤信号</span>{{end}}</section>
+        </article>
+      {{end}}
+      </div>
+    </section>
+    {{else}}
+      <section class="market-empty"><span>RADAR CLEAR</span><strong>{{.Config.EmptyTitle}}</strong><p>不是系统故障，也不会为了凑数量展示普通行情。可等待自动扫描或点击“立即扫描”。</p></section>
+    {{end}}
+    <footer class="market-disclaimer">研究与演示用途，不构成投资建议。目标价是结构化计划，不是确定预测。</footer>
+  </main>
+</body>
+</html>
+{{end}}

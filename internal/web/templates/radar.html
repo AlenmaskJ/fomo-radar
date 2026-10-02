@@ -1,0 +1,68 @@
+{{define "radar"}}
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>{{.Title}} · FomoRadar</title>
+  <link rel="stylesheet" href="/assets/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/"><span class="brand-dot"></span>FomoRadar</a>
+    <nav aria-label="主导航"><a href="/" aria-current="page">新币雷达</a><a href="/market">主流币雷达</a><a href="/stocks">美股雷达</a><a href="/market/history">历史榜单</a></nav>
+    <span class="read-only">SQLite · 只读</span>
+  </header>
+  <main class="shell">
+    <section class="hero compact-hero">
+      <div><p class="eyebrow">BSC + SOLANA · LIVE EVIDENCE</p><h1>FOMO Radar</h1><p>实时发现 BSC + Solana 新 Meme 异动</p></div>
+      <div class="legend"><span class="tier BREAKOUT">突破 <small>BREAKOUT</small></span><span class="tier FAST_RISING">快速升温 <small>FAST_RISING</small></span><span class="tier WATCH">观察 <small>WATCH</small></span></div>
+    </section>
+
+    <section class="status-strip panel" aria-label="Scanner 状态">
+      <div class="watch-state {{if .Status.Monitoring}}online{{else}}offline{{end}}"><span class="status-dot"></span><strong>{{if .Status.Monitoring}}监控中{{else}}已停止{{end}}</strong><small>{{.Status.Mode}}</small></div>
+      <div><span>上次 Fast Scan</span><strong>{{relative .Status.LastScanAt}}</strong></div>
+      <div><span>下次 Scan</span><strong>{{relative .Status.NextScanAt}}</strong></div>
+      <div><span>BSC覆盖</span><strong>{{coverage .Status.BSC}}</strong><small>{{.Status.BSC.UniqueCandidates}} candidates · {{.Status.BSC.PagesFetched}}页</small></div>
+      <div><span>SOL覆盖</span><strong>{{coverage .Status.Solana}}</strong><small>{{.Status.Solana.UniqueCandidates}} candidates · {{.Status.Solana.PagesFetched}}页</small></div>
+      <div><span>Deep</span><strong>{{.Status.DeepQueued}} 等待 / {{intValue .Status.DeepRunning}} 处理中</strong><small>{{.Status.DeepCompleted}} 完成 · {{.Status.DeepFailed}} 失败</small></div>
+      <div><span>Gecko</span><strong>{{providerLabel .Status.GeckoStatus}}</strong></div>
+      <div><span>Dex</span><strong>{{providerLabel .Status.DexStatus}}</strong></div>
+    </section>
+
+    <section class="panel radar-panel">
+      <div class="panel-head"><div><span class="pulse"></span>现在最值得关注</div><span>{{len .Tokens}} 个异动候选 · 最多 30 个</span></div>
+      {{if .Tokens}}
+      <div class="table-wrap">
+        <table class="radar-table">
+          <thead><tr><th>Token</th><th>链 / 年龄</th><th>为什么正在异动</th><th>FOMO</th><th>市场</th><th>启动 / 数据</th><th>处理状态</th></tr></thead>
+          <tbody>
+          {{range .Tokens}}
+            <tr>
+              <td data-label="Token"><a class="token-link" href="{{tokenURL .}}"><strong>{{.Symbol}}</strong><span>{{.Name}}</span></a><code title="{{.Address}}">{{.Address}}</code></td>
+              <td data-label="链 / 年龄"><span class="chain {{.Chain}}">{{chainLabel .Chain}}</span><span class="metric-sub">{{age .AgeSeconds}}</span></td>
+              <td data-label="为什么正在异动">
+                <div class="momentum-grid">
+                  <span>5分钟成交量</span><strong>{{money .VolumeM5USD}} <em>{{percent .VolumeChangePercent}}</em></strong>
+                  <span>买家</span><strong>{{intPair .PreviousBuyersM5 .MomentumBuyersM5}}</strong>
+                  <span>买卖比</span><strong>{{ratio .BuySellRatio}}</strong>
+                  <span>Score</span><strong>{{scorePair .PreviousRawScore .RawScore}} <em>{{delta .ScoreDelta}}</em></strong>
+                </div>
+              </td>
+              <td data-label="FOMO"><strong class="score">{{score .RawScore}}</strong><span class="tier {{.EffectiveTier}}">{{tierLabel .EffectiveTier}} <small>{{.EffectiveTier}}</small></span><span class="metric-sub">证据 {{confidenceLabel .EvidenceConfidence}} · {{.EvidenceAvailable}} / {{.EvidenceTotal}}</span></td>
+              <td data-label="市场"><strong>MC {{money .MarketCapUSD}}</strong><span class="metric-sub">Liquidity {{money .LiquidityUSD}}</span></td>
+              <td data-label="启动 / 数据"><strong>{{launchLabel .LaunchType}}</strong><span class="metric-sub">{{sourceLabel .MarketDataSource}} · {{dataLabel .DataQuality}}</span></td>
+              <td data-label="处理状态"><strong class="fast-ok">Fast ✓</strong><span class="metric-sub deep-state {{.DeepStatus}}">{{deepLabel .DeepStatus}}</span></td>
+            </tr>
+          {{end}}
+          </tbody>
+        </table>
+      </div>
+      {{else}}
+      <div class="empty"><strong>当前没有高质量异动候选</strong><span>Radar 仅展示突破、快速升温及 HIGH/GOOD 的观察候选。</span></div>
+      {{end}}
+    </section>
+  </main>
+</body>
+</html>
+{{end}}

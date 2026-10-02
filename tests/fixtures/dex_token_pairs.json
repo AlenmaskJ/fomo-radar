@@ -1,0 +1,42 @@
+[
+  {
+    "chainId": "solana",
+    "pairAddress": "pair-low",
+    "baseToken": {"address": "token-new", "name": "New Coin", "symbol": "NEW"},
+    "priceUsd": "0.01",
+    "txns": {"m5": {"buys": 1, "sells": 2}},
+    "volume": {"m5": 10, "h1": 20},
+    "priceChange": {"m5": 1.5},
+    "liquidity": {"usd": 1000},
+    "fdv": 100000,
+    "marketCap": 90000,
+    "pairCreatedAt": 1786874400000
+  },
+  {
+    "chainId": "solana",
+    "pairAddress": "pair-high",
+    "baseToken": {"address": "token-new", "name": "New Coin", "symbol": "NEW"},
+    "priceUsd": "0.025",
+    "txns": {"m5": {"buys": 17, "sells": 6}},
+    "volume": {"m5": 4321.5, "h1": 9876.25},
+    "priceChange": {"m5": 12.5},
+    "liquidity": {"usd": 75000},
+    "fdv": 250000,
+    "marketCap": null,
+    "pairCreatedAt": 1786880100000,
+    "info": {
+      "websites": [{"label": "Website", "url": "https://new.example"}],
+      "socials": [
+        {"type": "twitter", "url": "https://x.com/newcoin"},
+        {"type": "telegram", "url": "https://t.me/newcoin"}
+      ]
+    },
+    "boosts": {"active": 3}
+  },
+  {
+    "chainId": "solana",
+    "pairAddress": "pair-other",
+    "baseToken": {"address": "another-token", "name": "Other", "symbol": "OTHER"},
+    "liquidity": {"usd": 999999}
+  }
+]
